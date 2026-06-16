@@ -122,11 +122,16 @@ local function getPlayUI()
     return _playUI
 end
 
+local _fireSignal = _genv.firesignal or _genv.fire_signal
 local function clickGameUIButton(btn)
     if not btn then return end
-    local conns = _getConnections and _getConnections(btn.Activated)
-    if conns then
-        for _, c in ipairs(conns) do task.spawn(c.Fire, c) end
+    if _fireSignal then
+        _fireSignal(btn.Activated)
+    elseif _getConnections then
+        local conns = _getConnections(btn.Activated)
+        if conns then
+            for _, c in ipairs(conns) do task.spawn(c.Fire, c) end
+        end
     end
 end
 
@@ -1194,7 +1199,11 @@ local function buildGui()
                 warn("[AnimeSquadron] No cached source to queue")
             end
         else
-            queue_on_teleport("")
+            if clearteleportqueue then
+                clearteleportqueue()
+            else
+                queue_on_teleport("")
+            end
             print("[AnimeSquadron] Teleport queue cleared")
         end
     end)
